@@ -11,7 +11,7 @@ Add to `mix.exs`
   defp deps do
     [
       # ...
-      {:zf, "~> 1.1"}
+      {:zf, "~> 0.1"}
       # ...
     ]
   end
@@ -32,4 +32,6 @@ Use in your template.
 
 ```elixir
 <%= Zf.Grid.create([class: "expanded align-middle"], [[content: "Some content", class: "small-12"]]) %>
+
+<%= Zf.Grid.create([class: "expanded align-middle"], [%{content: "Some content", class: "small-12"}]) %>
 ```
