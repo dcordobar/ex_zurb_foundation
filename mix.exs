@@ -33,6 +33,7 @@ defmodule Zf.Mixfile do
     [
       {:phoenix, "~> 1.2.0"},
       {:phoenix_html, "~> 2.6"},
+      {:ex_doc, "~> 0.15", only: :dev},
     ]
   end
 
@@ -45,7 +46,7 @@ defmodule Zf.Mixfile do
   defp package do
     [
       # These are the default files included in the package
-      name: :postgrex,
+      name: :ex_zurb_foundation,
       files: ["lib", "config", "mix.exs", "README*", "LICENSE"],
       maintainers: ["Xavier Nouvilas"],
       licenses: ["MIT"],
