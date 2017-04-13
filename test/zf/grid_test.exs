@@ -19,7 +19,7 @@ defmodule Zf.GridTest do
         "Some content", 60, 47, "div", 62]], 60, 47, "div", 62]
     }
 
-    assert expected == Zf.Grid.create([class: "expanded align-middle"], params[:grid_default])
+    assert expected == Zf.Grid.get([class: "expanded align-middle"], params[:grid_default])
 
   end
 
@@ -32,7 +32,7 @@ defmodule Zf.GridTest do
         "Some content", 60, 47, "li", 62]], 60, 47, "ul", 62]
     }
 
-    assert expected == Zf.Grid.create([class: "expanded align-middle", tag: :ul], params[:grid_custom])
+    assert expected == Zf.Grid.get([class: "expanded align-middle", tag: :ul], params[:grid_custom])
 
   end
 
@@ -45,7 +45,7 @@ defmodule Zf.GridTest do
         "Some content", 60, 47, "div", 62]], 60, 47, "div", 62]
     }
 
-    assert expected == Zf.Grid.create([class: "expanded align-middle"], params[:grid_map])
+    assert expected == Zf.Grid.get([class: "expanded align-middle"], params[:grid_map])
 
   end
 end

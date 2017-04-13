@@ -31,7 +31,7 @@ Add to `mix.exs`
 Use in your template.
 
 ```elixir
-<%= Zf.Grid.create([class: "expanded align-middle"], [[content: "Some content", class: "small-12"]]) %>
+<%= Zf.Grid.get([class: "expanded align-middle"], [[content: "Some content", class: "small-12"]]) %>
 
-<%= Zf.Grid.create([class: "expanded align-middle"], [%{content: "Some content", class: "small-12"}]) %>
+<%= Zf.Grid.get([class: "expanded align-middle"], [%{content: "Some content", class: "small-12"}]) %>
 ```
