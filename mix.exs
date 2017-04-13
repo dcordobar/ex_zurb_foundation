@@ -7,6 +7,8 @@ defmodule Zf.Mixfile do
      elixir: "~> 1.4",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
+     description: description(),
+     package: package(),
      deps: deps()]
   end
 
@@ -31,6 +33,25 @@ defmodule Zf.Mixfile do
     [
       {:phoenix, "~> 1.2.0"},
       {:phoenix_html, "~> 2.6"},
+    ]
+  end
+
+  defp description do
+    """
+    Helpers built to work with Phoenix's page struct to easily build HTML output for ZURB Foundation framework.
+    """
+  end
+
+  defp package do
+    [
+      # These are the default files included in the package
+      name: :postgrex,
+      files: ["lib", "config", "mix.exs", "README*", "LICENSE"],
+      maintainers: ["Xavier Nouvilas"],
+      licenses: ["MIT"],
+      links: %{
+        "GitHub" => "https://github.com/xnouvilas/ex_zurb_foundation"
+      }
     ]
   end
 end
