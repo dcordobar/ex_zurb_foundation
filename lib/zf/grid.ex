@@ -24,10 +24,13 @@ defmodule Zf.Grid do
     row(options, contents |> Enum.map(fn(content) -> col(content) end))
   end
 
+  def row(options, content) when is_list(options), do: row(Enum.into(options, %{}), content)
   def row(options, content) do
-    opts = [class: "#{options[:class]} row"]
+    class = %{class: "#{options[:class]} row"}
 
-    content_tag(default_tag(options[:tag]), content, opts)
+    opts = options |> Map.drop([:tag])
+
+    content_tag(default_tag(options[:tag]), content, Map.merge(opts, class) |> Map.to_list)
   end
 
   def col(content) do
