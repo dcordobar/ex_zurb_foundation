@@ -10,7 +10,7 @@ defmodule Zf.Paginator.Support.HTML do
   def links_with_opts(paginator, opts \\ []) do
     paginator
     |> Enum.into(%{})
-    |> Zf.Paginator.HTML.raw_pagination_links(Keyword.merge([next: false, previous: false, first: false, last: false], opts))
+    |> Zf.Paginator.raw_pagination_links(Keyword.merge([next: false, previous: false, first: false, last: false], opts))
   end
 
 end

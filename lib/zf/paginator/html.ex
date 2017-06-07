@@ -1,4 +1,4 @@
-defmodule Zf.Paginator.HTML do
+defmodule Zf.Paginator do
  use Phoenix.HTML
   @defaults [action: :index, page_param: :page]
   @raw_defaults [distance: 5, next: ">>", previous: "<<", first: true, last: true, ellipsis: raw("&hellip;")]
@@ -13,7 +13,7 @@ defmodule Zf.Paginator.HTML do
 
       defmodule MyApp.UserView do
         use MyApp.Web, :view
-        use Zf.Paginator.HTML
+        use Zf.Paginator
       end
 
   Use in your template.
@@ -26,18 +26,18 @@ defmodule Zf.Paginator.HTML do
 
       <%= pagination_links @conn, @page, distance: 5, next: ">>", previous: "<<", first: true, last: true %>
 
-  See `Zf.Paginator.HTML.raw_pagination_links/2` for option descriptions.
+  See `Zf.Paginator.raw_pagination_links/2` for option descriptions.
 
-  For custom HTML output, see `Zf.Paginator.HTML.raw_pagination_links/2`.
+  For custom HTML output, see `Zf.Paginator.raw_pagination_links/2`.
 
-  For SEO related functions, see `Zf.Paginator.HTML.SEO` (these are automatically imported).
+  For SEO related functions, see `Zf.Paginator.SEO` (these are automatically imported).
   """
 
   @doc false
   defmacro __using__(_) do
     quote do
-      import Zf.Paginator.HTML
-      import Zf.Paginator.HTML.SEO
+      import Zf.Paginator
+      import Zf.Paginator.SEO
     end
   end
 
@@ -46,7 +46,7 @@ defmodule Zf.Paginator.HTML do
     Default path function when none provided. Used when automatic path function
     resolution cannot be performed.
 
-        iex> Zf.Paginator.HTML.Default.path(%Plug.Conn{}, :index, page: 4)
+        iex> Zf.Paginator.Default.path(%Plug.Conn{}, :index, page: 4)
         "?page=4"
     """
     def path(_conn, _action, opts \\ []) do
@@ -67,7 +67,7 @@ defmodule Zf.Paginator.HTML do
   as `params` to the path helper function. For example, `@post`, which has an index of paginated
   `@comments` would look like the following:
 
-      Zf.Paginator.HTML.pagination_links(@conn, @comments, [@post], my_param: "foo")
+      Zf.Paginator.pagination_links(@conn, @comments, [@post], my_param: "foo")
 
   You'll need to be sure to configure `:scrivener_html` with the `:routes_helper`
   module (ex. MyApp.Routes.Helpers) in Phoenix. With that configured, the above would generate calls
@@ -77,7 +77,7 @@ defmodule Zf.Paginator.HTML do
   correct path function to use by adding an extra key in the `opts` parameter of `:path`.
   For example:
 
-      Zf.Paginator.HTML.pagination_links(@conn, @comments, [@post], path: &post_comment_path/4)
+      Zf.Paginator.pagination_links(@conn, @comments, [@post], path: &post_comment_path/4)
 
   Be sure to supply the function which accepts query string parameters (starts at arity 3, +1 for each relation),
   because the `page` parameter will always be supplied. If you supply the wrong function you will receive a
@@ -117,7 +117,7 @@ defmodule Zf.Paginator.HTML do
   # Define a different version of `find_path_fn` whenever Phoenix is available.
   if Code.ensure_loaded(Phoenix.Naming) do
     def find_path_fn(entries, path_args) do
-      routes_helper_module = Application.get_env(:zf, :routes_helper) || raise("Zf.Paginator.HTML: Unable to find configured routes_helper module (ex. MyApp.Router.Helper)")
+      routes_helper_module = Application.get_env(:zf, :routes_helper) || raise("Zf.Paginator: Unable to find configured routes_helper module (ex. MyApp.Router.Helper)")
       path = (path_args) |> Enum.reduce(name_for(List.first(entries), ""), &name_for/2)
       {path_fn, []} = Code.eval_quoted(quote do: &unquote(routes_helper_module).unquote(:"#{path <> "_path"}")/unquote(length(path_args) + 3))
       path_fn
@@ -151,7 +151,7 @@ defmodule Zf.Paginator.HTML do
     content_tag :li, class: li_classes_for_style(paginator, page_number) |> Enum.join(" ") do
       to = apply(path, args ++ [params_with_page])
       if to do
-        link(safe(text), to: to, rel: Zf.Paginator.HTML.SEO.rel(paginator, page_number), class: link_classes_for_style(paginator, page_number) |> Enum.join(" "))
+        link(safe(text), to: to, rel: Zf.Paginator.SEO.rel(paginator, page_number), class: link_classes_for_style(paginator, page_number) |> Enum.join(" "))
       else
         content_tag(:span, safe(text), class: link_classes_for_style(paginator, page_number) |> Enum.join(" "))
       end
@@ -180,9 +180,9 @@ defmodule Zf.Paginator.HTML do
   them from the output. `first` and `last` are only booleans, and they just include/remove
   their respective link from output. An example of the data returned:
 
-      iex> Zf.Paginator.HTML.raw_pagination_links(%{total_pages: 10, page_number: 5})
+      iex> Zf.Paginator.raw_pagination_links(%{total_pages: 10, page_number: 5})
       [{"<<", 4}, {1, 1}, {2, 2}, {3, 3}, {4, 4}, {5, 5}, {6, 6}, {7, 7}, {8, 8}, {9, 9}, {10, 10}, {">>", 6}]
-      iex> Zf.Paginator.HTML.raw_pagination_links(%{total_pages: 20, page_number: 10}, first: ["←"], last: ["→"])
+      iex> Zf.Paginator.raw_pagination_links(%{total_pages: 20, page_number: 10}, first: ["←"], last: ["→"])
       [{"<<", 9}, {["←"], 1}, {:ellipsis, {:safe, "&hellip;"}}, {5, 5}, {6, 6},{7, 7}, {8, 8}, {9, 9}, {10, 10}, {11, 11}, {12, 12}, {13, 13}, {14, 14},{15, 15}, {:ellipsis, {:safe, "&hellip;"}}, {["→"], 20}, {">>", 11}]
 
   Simply loop and pattern match over each item and transform it to your custom HTML.

@@ -1,8 +1,8 @@
-defmodule Zf.Paginator.HTML.SEOTest do
+defmodule Zf.Paginator.SEOTest do
   use ExUnit.Case
-  import Zf.Paginator.HTML.SEO
+  import Zf.Paginator.SEO
   alias Scrivener.Page
-  doctest Zf.Paginator.HTML.SEO
+  doctest Zf.Paginator.SEO
 
   describe "#rel" do
     test "on the first page - page 2" do
