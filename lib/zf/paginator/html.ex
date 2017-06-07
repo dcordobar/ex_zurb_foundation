@@ -6,8 +6,8 @@ defmodule Zf.Paginator do
   @moduledoc """
   For use with Phoenix.HTML, configure the `:routes_helper` module like the following:
 
-      config :scrivener_html,
-      routes_helper: MyApp.Router.Helpers
+      config :zf,
+        routes_helper: MyApp.Router.Helpers
 
   Import to you view.
 
@@ -18,17 +18,17 @@ defmodule Zf.Paginator do
 
   Use in your template.
 
-      <%= pagination_links @conn, @page %>
+      <%= get @conn, @page %>
 
   Where `@page` is a `%Scrivener.Page{}` struct returned from `Repo.paginate/2`.
 
   Customize output. Below are the defaults.
 
-      <%= pagination_links @conn, @page, distance: 5, next: ">>", previous: "<<", first: true, last: true %>
+      <%= get @conn, @page, distance: 5, next: ">>", previous: "<<", first: true, last: true %>
 
-  See `Zf.Paginator.raw_pagination_links/2` for option descriptions.
+  See `Zf.Paginator.raw_get/2` for option descriptions.
 
-  For custom HTML output, see `Zf.Paginator.raw_pagination_links/2`.
+  For custom HTML output, see `Zf.Paginator.raw_get/2`.
 
   For SEO related functions, see `Zf.Paginator.SEO` (these are automatically imported).
   """
@@ -67,9 +67,9 @@ defmodule Zf.Paginator do
   as `params` to the path helper function. For example, `@post`, which has an index of paginated
   `@comments` would look like the following:
 
-      Zf.Paginator.pagination_links(@conn, @comments, [@post], my_param: "foo")
+      Zf.Paginator.get(@conn, @comments, [@post], my_param: "foo")
 
-  You'll need to be sure to configure `:scrivener_html` with the `:routes_helper`
+  You'll need to be sure to configure `:zf` with the `:routes_helper`
   module (ex. MyApp.Routes.Helpers) in Phoenix. With that configured, the above would generate calls
   to the `post_comment_path(@conn, :index, @post.id, my_param: "foo", page: page)` for each page link.
 
@@ -77,39 +77,39 @@ defmodule Zf.Paginator do
   correct path function to use by adding an extra key in the `opts` parameter of `:path`.
   For example:
 
-      Zf.Paginator.pagination_links(@conn, @comments, [@post], path: &post_comment_path/4)
+      Zf.Paginator.get(@conn, @comments, [@post], path: &post_comment_path/4)
 
   Be sure to supply the function which accepts query string parameters (starts at arity 3, +1 for each relation),
   because the `page` parameter will always be supplied. If you supply the wrong function you will receive a
   function undefined exception.
   """
 
-  def pagination_links(conn, paginator, args, opts) do
+  def get(conn, paginator, args, opts) do
     merged_opts = Keyword.merge @defaults, opts
     path = opts[:path] || find_path_fn(conn && paginator.entries, args)
     params = Keyword.drop opts, (Keyword.keys(@defaults) ++ [:path])
 
     # Ensure ordering so pattern matching is reliable
-    _pagination_links paginator,
+    _get paginator,
       path: path,
       args: [conn, merged_opts[:action]] ++ args,
       page_param: merged_opts[:page_param],
       params: params
   end
-  def pagination_links(%Scrivener.Page{} = paginator) do
-    pagination_links(nil, paginator, [], [])
+  def get(%Scrivener.Page{} = paginator) do
+    get(nil, paginator, [], [])
   end
-  def pagination_links(%Scrivener.Page{} = paginator, opts) do
-    pagination_links(nil, paginator, [], opts)
+  def get(%Scrivener.Page{} = paginator, opts) do
+    get(nil, paginator, [], opts)
   end
-  def pagination_links(conn, %Scrivener.Page{} = paginator) do
-    pagination_links(conn, paginator, [], [])
+  def get(conn, %Scrivener.Page{} = paginator) do
+    get(conn, paginator, [], [])
   end
-  def pagination_links(conn, paginator, [{_, _} | _] = opts) do
-    pagination_links(conn, paginator, [], opts)
+  def get(conn, paginator, [{_, _} | _] = opts) do
+    get(conn, paginator, [], opts)
   end
-  def pagination_links(conn, paginator, [_ | _] = args) do
-    pagination_links(conn, paginator, args, [])
+  def get(conn, paginator, [_ | _] = args) do
+    get(conn, paginator, args, [])
   end
 
   def find_path_fn(nil, _path_args), do: &Default.path/3
@@ -130,11 +130,11 @@ defmodule Zf.Paginator do
     "#{acc}#{if(acc != "", do: "_")}#{Phoenix.Naming.resource_name(model.__struct__)}"
   end
 
-  defp _pagination_links(paginator, [path: path, args: args, page_param: page_param, params: params]) do
+  defp _get(paginator, [path: path, args: args, page_param: page_param, params: params]) do
     url_params = Keyword.drop params, Keyword.keys(@raw_defaults)
 
     content_tag :ul, class: "pagination", role: "pagination" do
-      raw_pagination_links(paginator, params)
+      raw_get(paginator, params)
       |> Enum.map(&page(&1, url_params, args, page_param, path, paginator))
     end
   end
@@ -180,14 +180,14 @@ defmodule Zf.Paginator do
   them from the output. `first` and `last` are only booleans, and they just include/remove
   their respective link from output. An example of the data returned:
 
-      iex> Zf.Paginator.raw_pagination_links(%{total_pages: 10, page_number: 5})
+      iex> Zf.Paginator.raw_get(%{total_pages: 10, page_number: 5})
       [{"<<", 4}, {1, 1}, {2, 2}, {3, 3}, {4, 4}, {5, 5}, {6, 6}, {7, 7}, {8, 8}, {9, 9}, {10, 10}, {">>", 6}]
-      iex> Zf.Paginator.raw_pagination_links(%{total_pages: 20, page_number: 10}, first: ["←"], last: ["→"])
+      iex> Zf.Paginator.raw_get(%{total_pages: 20, page_number: 10}, first: ["←"], last: ["→"])
       [{"<<", 9}, {["←"], 1}, {:ellipsis, {:safe, "&hellip;"}}, {5, 5}, {6, 6},{7, 7}, {8, 8}, {9, 9}, {10, 10}, {11, 11}, {12, 12}, {13, 13}, {14, 14},{15, 15}, {:ellipsis, {:safe, "&hellip;"}}, {["→"], 20}, {">>", 11}]
 
   Simply loop and pattern match over each item and transform it to your custom HTML.
   """
-  def raw_pagination_links(paginator, options \\ []) do
+  def raw_get(paginator, options \\ []) do
 
     options = Keyword.merge @raw_defaults, options
 
