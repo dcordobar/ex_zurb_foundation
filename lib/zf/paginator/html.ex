@@ -148,12 +148,15 @@ defmodule Zf.Paginator do
 
   defp page({text, page_number}, url_params, args, page_param, path, paginator) do
     params_with_page = url_params ++ [{page_param, page_number}]
-    content_tag :li, class: li_classes_for_style(paginator, page_number) |> Enum.join(" ") do
-      to = apply(path, args ++ [params_with_page])
-      if to do
-        link(safe(text), to: to, rel: Zf.Paginator.SEO.rel(paginator, page_number), class: link_classes_for_style(paginator, page_number) |> Enum.join(" "))
-      else
-        content_tag(:span, safe(text), class: link_classes_for_style(paginator, page_number) |> Enum.join(" "))
+    to = apply(path, args ++ [params_with_page])
+
+    if paginator.page_number == page_number || to == nil do
+      content_tag :li, class: li_classes_for_style(paginator, page_number) |> Enum.join(" ") do
+        [content_tag(:span, "You're on page", class: ["show-for-sr"] |> Enum.join(" ")), safe(text)]
+      end
+    else
+      content_tag :li do
+        link(safe(text), to: to, rel: Zf.Paginator.SEO.rel(paginator, page_number))
       end
     end
   end
@@ -161,10 +164,6 @@ defmodule Zf.Paginator do
   defp li_classes_for_style(_paginator, :ellipsis), do: ["ellipsis"]
   defp li_classes_for_style(paginator, page_number) do
     if(paginator.page_number == page_number, do: ["current"], else: [])
-  end
-
-  defp link_classes_for_style(_paginator, _page_number) do
-    []
   end
 
   @doc """

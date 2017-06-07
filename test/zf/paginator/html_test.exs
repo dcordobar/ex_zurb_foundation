@@ -200,21 +200,21 @@ defmodule Zf.PaginatorTest do
     end
 
     test "accepts an override page param name" do
-      html = Zf.Paginator.get(%Page{total_pages: 2, page_number: 2}, page_param: :custom_pp)
+      html = Zf.Paginator.get(%Page{total_pages: 2, page_number: 1}, page_param: :custom_pp)
       assert Phoenix.HTML.safe_to_string(html) =~ ~r(custom_pp=2)
     end
 
     test "allows unicode" do
       html = Zf.Paginator.get(%Page{total_pages: 2, page_number: 2}, previous: "«")
       assert Phoenix.HTML.safe_to_string(html) == """
-      <ul class=\"pagination\" role=\"pagination\"><li class=\"\"><a class=\"\" href=\"?page=1\" rel=\"prev\">«</a></li><li class=\"\"><a class=\"\" href=\"?page=1\" rel=\"prev\">1</a></li><li class=\"current\"><a class=\"\" href=\"?page=2\" rel=\"canonical\">2</a></li></ul>
+      <ul class=\"pagination\" role=\"pagination\"><li><a href=\"?page=1\" rel=\"prev\">«</a></li><li><a href=\"?page=1\" rel=\"prev\">1</a></li><li class=\"current\"><span class=\"show-for-sr\">You&#39;re on page</span>2</li></ul>
       """ |> String.trim_trailing
     end
 
     test "allows using raw" do
       html = Zf.Paginator.get(%Page{total_pages: 2, page_number: 2}, previous: Phoenix.HTML.raw("&leftarrow;"))
       assert Phoenix.HTML.safe_to_string(html) == """
-      <ul class=\"pagination\" role=\"pagination\"><li class=\"\"><a class=\"\" href=\"?page=1\" rel=\"prev\">&leftarrow;</a></li><li class=\"\"><a class=\"\" href=\"?page=1\" rel=\"prev\">1</a></li><li class=\"current\"><a class=\"\" href=\"?page=2\" rel=\"canonical\">2</a></li></ul>
+      <ul class=\"pagination\" role=\"pagination\"><li><a href=\"?page=1\" rel=\"prev\">&leftarrow;</a></li><li><a href=\"?page=1\" rel=\"prev\">1</a></li><li class=\"current\"><span class=\"show-for-sr\">You&#39;re on page</span>2</li></ul>
       """ |> String.trim_trailing
     end
 
@@ -230,9 +230,9 @@ defmodule Zf.PaginatorTest do
       Application.put_env(:zf, :routes_helper, MyApp.Router.Helpers)
 
       assert {:safe, [60, "ul", [[32, "class", 61, 34, "pagination", 34], [32, "role", 61, 34, "pagination", 34]], 62,
-                       [[60, "li", [[32, "class", 61, 34, "current", 34]], 62,
-                         [60, "span", [[32, "class", 61, 34, "", 34]], 62, "1", 60, 47,
-                          "span", 62], 60, 47, "li", 62]], 60, 47, "ul", 62]} =
+                      [[60, "li", [[32, "class", 61, 34, "current", 34]], 62,
+                      [[60, "span", [[32, "class", 61, 34, "show-for-sr", 34]], 62,
+                      "You&#39;re on page", 60, 47, "span", 62], "1"], 60, 47, "li", 62]], 60, 47, "ul", 62]} =
         Zf.Paginator.get(build_conn(), %Page{entries: [], page_number: 1, page_size: 10, total_entries: 0, total_pages: 0})
     end
 
@@ -240,7 +240,7 @@ defmodule Zf.PaginatorTest do
       use Phoenix.ConnTest
       Application.put_env(:zf, :routes_helper, MyApp.Router.Helpers)
 
-      assert "<ul class=\"pagination\" role=\"pagination\"><li class=\"current\"><a class=\"\" href=\"/posts?url_param=param&page=1\" rel=\"canonical\">1</a></li><li class=\"\"><a class=\"\" href=\"/posts?url_param=param&page=2\" rel=\"next\">2</a></li><li class=\"\"><a class=\"\" href=\"/posts?url_param=param&page=3\" rel=\"canonical\">3</a></li><li class=\"\"><a class=\"\" href=\"/posts?url_param=param&page=4\" rel=\"canonical\">4</a></li><li class=\"\"><a class=\"\" href=\"/posts?url_param=param&page=5\" rel=\"canonical\">5</a></li><li class=\"\"><a class=\"\" href=\"/posts?url_param=param&page=6\" rel=\"canonical\">6</a></li><li class=\"ellipsis\"></li><li class=\"\"><a class=\"\" href=\"/posts?url_param=param&page=20\" rel=\"canonical\">20</a></li><li class=\"\"><a class=\"\" href=\"/posts?url_param=param&page=2\" rel=\"next\">&gt;&gt;</a></li></ul>" ==
+      assert "<ul class=\"pagination\" role=\"pagination\"><li class=\"current\"><span class=\"show-for-sr\">You&#39;re on page</span>1</li><li><a href=\"/posts?url_param=param&page=2\" rel=\"next\">2</a></li><li><a href=\"/posts?url_param=param&page=3\" rel=\"canonical\">3</a></li><li><a href=\"/posts?url_param=param&page=4\" rel=\"canonical\">4</a></li><li><a href=\"/posts?url_param=param&page=5\" rel=\"canonical\">5</a></li><li><a href=\"/posts?url_param=param&page=6\" rel=\"canonical\">6</a></li><li class=\"ellipsis\"></li><li><a href=\"/posts?url_param=param&page=20\" rel=\"canonical\">20</a></li><li><a href=\"/posts?url_param=param&page=2\" rel=\"next\">&gt;&gt;</a></li></ul>" ==
         Zf.Paginator.get(build_conn(), %Page{entries: [%{__struct__: Post, some: :object}], page_number: 1, page_size: 10, total_entries: 200, total_pages: 20}, url_param: "param")
         |> Phoenix.HTML.safe_to_string()
     end
@@ -251,59 +251,57 @@ defmodule Zf.PaginatorTest do
 
     test "without ellipsis" do
       assert {:safe, [60, "ul",
-                      [[32, "class", 61, 34, "pagination", 34],
-                       [32, "role", 61, 34, "pagination", 34]], 62,
+                      [[32, "class", 61, 34, "pagination", 34], [32, "role", 61, 34, "pagination", 34]], 62,
                       [[60, "li", [[32, "class", 61, 34, "current", 34]], 62,
-                        [60, "span", [[32, "class", 61, 34, "", 34]], 62, "1", 60, 47,
-                         "span", 62], 60, 47, "li", 62],
-                       [60, "li", [[32, "class", 61, 34, "", 34]], 62,
-                        [60, "span", [[32, "class", 61, 34, "", 34]], 62, "2", 60, 47,
-                         "span", 62], 60, 47, "li", 62],
-                       [60, "li", [[32, "class", 61, 34, "", 34]], 62,
-                        [60, "span", [[32, "class", 61, 34, "", 34]], 62, "&gt;&gt;",
-                         60, 47, "span", 62], 60, 47, "li", 62]], 60, 47, "ul", 62]} =
+                      [[60, "span", [[32, "class", 61, 34, "show-for-sr", 34]], 62,
+                      "You&#39;re on page", 60, 47, "span", 62], "1"], 60, 47, "li", 62],
+                      [60, "li", [[32, "class", 61, 34, "", 34]], 62,
+                      [[60, "span", [[32, "class", 61, 34, "show-for-sr", 34]], 62,
+                      "You&#39;re on page", 60, 47, "span", 62], "2"], 60, 47, "li", 62],
+                      [60, "li", [[32, "class", 61, 34, "", 34]], 62,
+                      [[60, "span", [[32, "class", 61, 34, "show-for-sr", 34]],
+                      62, "You&#39;re on page", 60, 47, "span", 62], "&gt;&gt;"], 60, 47, "li", 62]], 60, 47, "ul", 62]} ==
         Zf.Paginator.get(build_conn(), %Page{entries: [], page_number: 1, page_size: 10, total_entries: 20, total_pages: 2})
     end
 
     test "with ellipsis" do
       assert {:safe, [60, "ul",
-                       [[32, "class", 61, 34, "pagination", 34],
-                        [32, "role", 61, 34, "pagination", 34]], 62,
-                       [[60, "li", [[32, "class", 61, 34, "", 34]], 62,
-                         [60, "span", [[32, "class", 61, 34, "", 34]], 62, "&lt;&lt;", 60, 47, "span",
-                          62], 60, 47, "li", 62],
-                        [60, "li", [[32, "class", 61, 34, "", 34]], 62,
-                         [60, "span", [[32, "class", 61, 34, "", 34]], 62, "1", 60, 47, "span", 62],
-                         60, 47, "li", 62],
-                        [60, "li", [[32, "class", 61, 34, "", 34]], 62,
-                         [60, "span", [[32, "class", 61, 34, "", 34]], 62, "2", 60, 47, "span", 62],
-                         60, 47, "li", 62],
-                        [60, "li", [[32, "class", 61, 34, "current", 34]], 62,
-                         [60, "span", [[32, "class", 61, 34, "", 34]], 62, "3", 60, 47, "span", 62],
-                         60, 47, "li", 62],
-                        [60, "li", [[32, "class", 61, 34, "", 34]], 62,
-                         [60, "span", [[32, "class", 61, 34, "", 34]], 62, "4", 60, 47, "span", 62],
-                         60, 47, "li", 62],
-                        [60, "li", [[32, "class", 61, 34, "", 34]], 62,
-                         [60, "span", [[32, "class", 61, 34, "", 34]], 62, "5", 60, 47, "span", 62],
-                         60, 47, "li", 62],
-                        [60, "li", [[32, "class", 61, 34, "", 34]], 62,
-                         [60, "span", [[32, "class", 61, 34, "", 34]], 62, "6", 60, 47, "span", 62],
-                         60, 47, "li", 62],
-                        [60, "li", [[32, "class", 61, 34, "", 34]], 62,
-                         [60, "span", [[32, "class", 61, 34, "", 34]], 62, "7", 60, 47, "span", 62],
-                         60, 47, "li", 62],
-                        [60, "li", [[32, "class", 61, 34, "", 34]], 62,
-                         [60, "span", [[32, "class", 61, 34, "", 34]], 62, "8", 60, 47, "span", 62],
-                         60, 47, "li", 62],
-                        [60, "li", [[32, "class", 61, 34, "ellipsis", 34]], 62, "",
-                         60, 47, "li", 62],
-                        [60, "li", [[32, "class", 61, 34, "", 34]], 62,
-                         [60, "span", [[32, "class", 61, 34, "", 34]], 62, "10", 60, 47, "span", 62],
-                         60, 47, "li", 62],
-                        [60, "li", [[32, "class", 61, 34, "", 34]], 62,
-                         [60, "span", [[32, "class", 61, 34, "", 34]], 62, "&gt;&gt;", 60, 47, "span",
-                          62], 60, 47, "li", 62]], 60, 47, "ul", 62]} ==
+                      [[32, "class", 61, 34, "pagination", 34],
+                      [32, "role", 61, 34, "pagination", 34]],62,
+                      [[60, "li", [[32, "class", 61, 34, "", 34]],62,
+                      [[60, "span", [[32, "class", 61, 34, "show-for-sr", 34]],62,
+                      "You&#39;re on page", 60, 47, "span", 62], "&lt;&lt;"],
+                      60, 47, "li", 62], [60, "li", [[32, "class", 61, 34, "", 34]],62,
+                      [[60, "span", [[32, "class", 61, 34, "show-for-sr", 34]],62,
+                      "You&#39;re on page", 60, 47, "span", 62], "1"],
+                      60, 47, "li", 62], [60, "li", [[32, "class", 61, 34, "", 34]], 62,
+                      [[60, "span", [[32, "class", 61, 34, "show-for-sr", 34]], 62,
+                      "You&#39;re on page", 60, 47, "span", 62], "2"], 60, 47, "li", 62],
+                      [60, "li", [[32, "class", 61, 34, "current", 34]], 62,
+                      [[60, "span", [[32, "class", 61, 34, "show-for-sr", 34]], 62,
+                      "You&#39;re on page", 60, 47, "span", 62], "3"], 60, 47, "li", 62],
+                      [60, "li", [[32, "class", 61, 34, "", 34]], 62,
+                      [[60, "span", [[32, "class", 61, 34, "show-for-sr", 34]], 62,
+                      "You&#39;re on page", 60, 47, "span", 62], "4"], 60, 47, "li", 62],
+                      [60, "li", [[32, "class", 61, 34, "", 34]], 62,
+                      [[60, "span", [[32, "class", 61, 34, "show-for-sr", 34]], 62,
+                      "You&#39;re on page", 60, 47, "span", 62], "5"], 60, 47, "li", 62],
+                      [60, "li", [[32, "class", 61, 34, "", 34]], 62,
+                      [[60, "span", [[32, "class", 61, 34, "show-for-sr", 34]], 62,
+                      "You&#39;re on page", 60, 47, "span", 62], "6"], 60, 47, "li", 62],
+                      [60, "li", [[32, "class", 61, 34, "", 34]], 62,
+                      [[60, "span", [[32, "class", 61, 34, "show-for-sr", 34]], 62,
+                      "You&#39;re on page", 60, 47, "span", 62], "7"], 60, 47, "li", 62],
+                      [60, "li", [[32, "class", 61, 34, "", 34]], 62,
+                      [[60, "span", [[32, "class", 61, 34, "show-for-sr", 34]], 62,
+                      "You&#39;re on page", 60, 47, "span", 62],
+                      "8"], 60, 47, "li", 62], [60, "li", [[32, "class", 61, 34, "ellipsis", 34]],
+                      62, "", 60, 47, "li", 62], [60, "li", [[32, "class", 61, 34, "", 34]], 62,
+                      [[60, "span", [[32, "class", 61, 34, "show-for-sr", 34]], 62,
+                      "You&#39;re on page", 60, 47, "span", 62], "10"], 60, 47, "li", 62],
+                      [60, "li", [[32, "class", 61, 34, "", 34]], 62,
+                      [[60, "span", [[32, "class", 61, 34, "show-for-sr", 34]], 62,
+                      "You&#39;re on page", 60, 47, "span", 62], "&gt;&gt;"], 60, 47, "li", 62]], 60, 47, "ul", 62]} ==
         Zf.Paginator.get(build_conn(), %Page{entries: [], page_number: 3, page_size: 10, total_entries: 100, total_pages: 10}, ellipsis: true)
     end
 
