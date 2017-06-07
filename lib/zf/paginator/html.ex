@@ -142,7 +142,7 @@ defmodule Zf.Paginator do
   defp page({:ellipsis, true}, url_params, args, page_param, path, paginator) do
     page({:ellipsis, ""}, url_params, args, page_param, path, paginator)
   end
-  defp page({:ellipsis, text}, _url_params, _args, _page_param, _path, paginator) do
+  defp page({:ellipsis, _text}, _url_params, _args, _page_param, _path, paginator) do
     content_tag(:li, "", class: li_classes_for_style(paginator, :ellipsis) |> Enum.join(" "))
   end
 
