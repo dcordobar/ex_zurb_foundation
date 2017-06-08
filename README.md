@@ -57,7 +57,7 @@ Use in your template.
 <%= zf_grid([class: "expanded align-middle"], [%{content: "Some content", class: "small-12"}]) %>
 ```
 
-### Paginator
+### Pagination
 
 Helpers built to work with [Scrivener's page](https://github.com/drewolson/scrivener) struct to easily build HTML output for ZURB Foundation framework.
 
