@@ -26,6 +26,24 @@ Add to `mix.exs`
   end
 ```
 
+Import to your view.
+
+```elixir
+defmodule MyApp.UserView do
+  use MyApp.Web, :view
+  import Zf.Grid
+  import Zf.Pagination
+end
+```
+
+For use with Phoenix.HTML, configure the `:routes_helper` module in `config/config.exs`
+like the following:
+
+```elixir
+config :zf,
+  routes_helper: MyApp.Router.Helpers,
+```
+
 ## Example Usage
 
 Use in your template.
@@ -34,31 +52,14 @@ Use in your template.
 ### Grid
 
 ```elixir
-<%= Zf.Grid.get([class: "expanded align-middle"], [[content: "Some content", class: "small-12"]]) %>
+<%= zf_grid([class: "expanded align-middle"], [[content: "Some content", class: "small-12"]]) %>
 
-<%= Zf.Grid.get([class: "expanded align-middle"], [%{content: "Some content", class: "small-12"}]) %>
+<%= zf_grid([class: "expanded align-middle"], [%{content: "Some content", class: "small-12"}]) %>
 ```
 
 ### Paginator
 
 Helpers built to work with [Scrivener's page](https://github.com/drewolson/scrivener) struct to easily build HTML output for ZURB Foundation framework.
-
-For use with Phoenix.HTML, configure the `:routes_helper` module in `config/config.exs`
-like the following:
-
-```elixir
-config :scrivener_html,
-  routes_helper: MyApp.Router.Helpers,
-```
-
-Import to your view.
-
-```elixir
-defmodule MyApp.UserView do
-  use MyApp.Web, :view
-  import Zf.Paginator
-end
-```
 
 #### Example Usage
 
@@ -69,7 +70,7 @@ Use in your template.
    ...
 <% end %>
 
-<%= Zf.Paginator.get @page %>
+<%= zf_pagination @page %>
 ```
 
 Where `@page` is a `%Scrivener.Page{}` struct returned from `Repo.paginate/2`.
@@ -103,7 +104,7 @@ You would need to pass in the `:locale` parameter and `:path` option like so:
 _(this would generate links like "/en/page?page=1")_
 
 ```elixir
-<%= Zf.Paginator.get @conn, @page, ["en"], path: &pages_path/4 %>
+<%= zf_pagination @conn, @page, ["en"], path: &pages_path/4 %>
 ```
 
 With a nested resource, simply add it to the list:
@@ -111,7 +112,7 @@ With a nested resource, simply add it to the list:
 _(this would generate links like "/en/pages/1?page=1")_
 
 ```elixir
-<%= Zf.Paginator.get @conn, @page, ["en", @page_id], path: &page_path/4, action: :show %>
+<%= zf_pagination @conn, @page, ["en", @page_id], path: &page_path/4, action: :show %>
 ```
 
 #### Query String Parameters
@@ -119,9 +120,9 @@ _(this would generate links like "/en/pages/1?page=1")_
 Any additional query string parameters can be passed in as well.
 
 ```elixir
-<%= Zf.Paginator.get @conn, @page, ["en"], some_parameter: "data" %>
+<%= zf_pagination @conn, @page, ["en"], some_parameter: "data" %>
 # Or if there are no URL parameters
-<%= Zf.Paginator.get @conn, @page, some_parameter: "data" %>
+<%= zf_pagination @conn, @page, some_parameter: "data" %>
 ```
 
 #### Custom Actions
@@ -129,7 +130,7 @@ Any additional query string parameters can be passed in as well.
 If you need to hit a different action other than `:index`, simply pass the action name to use in the url helper.
 
 ```elixir
-<%= Zf.Paginator.get @conn, @page, action: :show %>
+<%= zf_pagination @conn, @page, action: :show %>
 ```
 
 #### Customizing Output
@@ -137,15 +138,15 @@ If you need to hit a different action other than `:index`, simply pass the actio
 Below are the defaults which are used without passing in any options.
 
 ```elixir
-<%= Zf.Paginator.get @conn, @page, [], distance: 5, next: ">>", previous: "<<", first: true, last: true %>
+<%= zf_pagination @conn, @page, [], distance: 5, next: ">>", previous: "<<", first: true, last: true %>
 # Which is the same as
-<%= Zf.Paginator.get @conn, @page %>
+<%= zf_pagination @conn, @page %>
 ```
 
 To prevent HTML escaping (i.e. seeing things like `&lt;` on the page), simply use `Phoenix.HTML.raw/1` for any `&amp;` strings passed in, like so:
 
 ```elixir
-<%= Zf.Paginator.get @conn, @page, previous: Phoenix.HTML.raw("&leftarrow;"), next: Phoenix.HTML.raw("&rightarrow;") %>
+<%= zf_pagination @conn, @page, previous: Phoenix.HTML.raw("&leftarrow;"), next: Phoenix.HTML.raw("&rightarrow;") %>
 ```
 
 To show icons instead of text, simply render custom html templates, like:
@@ -154,9 +155,9 @@ _(this example uses materialize icons)_
 
 ```elixir
 # Using Phoenix.HTML's sigil_E for EEx
-<%= Zf.Paginator.get @conn, @page, previous: ~E(<i class="material-icons">chevron_left</i>), next: ~E(<i class="material-icons">chevron_right</i>) %>
+<%= zf_pagination @conn, @page, previous: ~E(<i class="material-icons">chevron_left</i>), next: ~E(<i class="material-icons">chevron_right</i>) %>
 # Or by calling render
-<%= Zf.Paginator.get @conn, @page, previous: render("pagination.html", direction: :prev), next: render("pagination.html", direction: :next)) %>
+<%= zf_pagination @conn, @page, previous: render("pagination.html", direction: :prev), next: render("pagination.html", direction: :next)) %>
 ```
 
 The same can be done for first/last links as well (`v1.7.0` or higher).
@@ -164,19 +165,19 @@ The same can be done for first/last links as well (`v1.7.0` or higher).
 _(this example uses materialize icons)_
 
 ```elixir
-<%= Zf.Paginator.get @conn, @page, first: ~E(<i class="material-icons">chevron_left</i>), last: ~E(<i class="material-icons">chevron_right</i>) %>
+<%= zf_pagination @conn, @page, first: ~E(<i class="material-icons">chevron_left</i>), last: ~E(<i class="material-icons">chevron_right</i>) %>
 ```
 
 ### Extending
 
-For custom HTML output, see `Zf.Paginator.get.raw_get/2`.
+For custom HTML output, see `Zf.Pagination.raw_pagination/2`.
 
-See `Zf.Paginator.raw_get/2` for option descriptions.
+See `Zf.Pagination.raw_pagination/2` for option descriptions.
 
-Zf.Paginator can be included in your view and then just used with a simple call to `get/1`.
+Zf.Pagination can be included in your view and then just used with a simple call to `zf_pagination/1`.
 
 ```elixir
-iex> Zf.Paginator.get(%Scrivener.Page{total_pages: 10, page_number: 5}) |> Phoenix.HTML.safe_to_string()
+iex> Zf.Pagination.zf_pagination(%Scrivener.Page{total_pages: 10, page_number: 5}) |> Phoenix.HTML.safe_to_string()
 "<ul class=\"pagination\" role= \"pagination\">
   <li class=\"\"><a class=\"\" href=\"?page=4\">&lt;&lt;</a></li>
   <li class=\"\"><a class=\"\" href=\"?page=1\">1</a></li>
@@ -197,4 +198,4 @@ iex> Zf.Paginator.get(%Scrivener.Page{total_pages: 10, page_number: 5}) |> Phoen
 
 SEO attributes like `rel` are automatically added to pagination links. In addition, a helper for header `<link>` tags is available (`v1.7.0` and higher) to be placed in the `<head>` tag.
 
-See `Zf.Paginator.SEO` documentation for more information.
+See `Zf.Pagination.SEO` documentation for more information.

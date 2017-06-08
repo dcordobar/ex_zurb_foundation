@@ -1,7 +1,7 @@
-defmodule Zf.PaginatorTest do
+defmodule Zf.PaginationTest do
   use ExUnit.Case
-  doctest Zf.Paginator
-  import Zf.Paginator.Support.HTML
+  doctest Zf.Pagination
+  import Zf.Pagination.Support.HTML
   alias Scrivener.Page
 
   setup do
@@ -9,7 +9,7 @@ defmodule Zf.PaginatorTest do
     :ok
   end
 
-  describe "raw_get for a page" do
+  describe "raw_pagination for a page" do
 
     test "in the middle" do
       assert pages(45..55) == links_with_opts total_pages: 100, page_number: 50
@@ -61,7 +61,7 @@ defmodule Zf.PaginatorTest do
 
   end
 
-  describe "raw_get next" do
+  describe "raw_pagination next" do
 
     test "includes a next" do
       assert pages_with_next(45..55, 51) == links_with_opts [total_pages: 100, page_number: 50], next: ">>"
@@ -77,7 +77,7 @@ defmodule Zf.PaginatorTest do
 
   end
 
-  describe "raw_get previous" do
+  describe "raw_pagination previous" do
 
     test "includes a previous" do
       assert pages_with_previous(49, 45..55) == links_with_opts [total_pages: 100, page_number: 50], previous: "<<"
@@ -97,7 +97,7 @@ defmodule Zf.PaginatorTest do
 
   end
 
-  describe "raw_get first" do
+  describe "raw_pagination first" do
 
     test "includes the first" do
       assert pages_with_first(1, 5..15) == links_with_opts [total_pages: 20, page_number: 10], first: true
@@ -113,7 +113,7 @@ defmodule Zf.PaginatorTest do
 
   end
 
-  describe "raw_get last" do
+  describe "raw_pagination last" do
 
     test "includes the last" do
       assert pages_with_last(20, 5..15) == links_with_opts [total_pages: 20, page_number: 10], last: true
@@ -129,21 +129,21 @@ defmodule Zf.PaginatorTest do
 
   end
 
-  describe "raw_get distance" do
+  describe "raw_pagination distance" do
 
     test "can change the distance" do
       assert pages(1..3) == links_with_opts [total_pages: 3, page_number: 2], distance: 1
     end
 
     test "does not allow negative distances" do
-      assert_raise RuntimeError, "Zf.Paginator: Distance cannot be less than one.", fn ->
+      assert_raise RuntimeError, "Zf.Pagination: Distance cannot be less than one.", fn ->
         links_with_opts [total_pages: 10, page_number: 5], distance: -5
       end
     end
 
   end
 
-  describe "raw_get ellipsis" do
+  describe "raw_pagination ellipsis" do
 
     test "includes ellipsis after first" do
       assert [{1, 1}, {:ellipsis, "&hellip;"}] ++ pages(45..55) == links_with_opts [total_pages: 100, page_number: 50], previous: false, first: true, ellipsis: "&hellip;"
@@ -180,46 +180,46 @@ defmodule Zf.PaginatorTest do
 
   end
 
-  describe "get" do
+  describe "zf_pagination" do
 
     test "accepts a paginator and options (same as defaults)" do
-      assert {:safe, _html} = Zf.Paginator.get(%Page{total_pages: 10, page_number: 5}, path: &MyApp.Router.Helpers.post_path/3)
+      assert {:safe, _html} = Zf.Pagination.zf_pagination(%Page{total_pages: 10, page_number: 5}, path: &MyApp.Router.Helpers.post_path/3)
     end
 
     test "supplies defaults" do
-      assert {:safe, _html} = Zf.Paginator.get(%Page{total_pages: 10, page_number: 5})
+      assert {:safe, _html} = Zf.Pagination.zf_pagination(%Page{total_pages: 10, page_number: 5})
     end
 
     test "allows options in any order" do
-      assert {:safe, _html} = Zf.Paginator.get(%Page{total_pages: 10, page_number: 5}, path: &MyApp.Router.Helpers.post_path/3)
+      assert {:safe, _html} = Zf.Pagination.zf_pagination(%Page{total_pages: 10, page_number: 5}, path: &MyApp.Router.Helpers.post_path/3)
     end
 
     test "accepts an override action" do
-      html = Zf.Paginator.get(%Page{total_pages: 10, page_number: 5}, action: :edit, path: &MyApp.Router.Helpers.post_path/3)
+      html = Zf.Pagination.zf_pagination(%Page{total_pages: 10, page_number: 5}, action: :edit, path: &MyApp.Router.Helpers.post_path/3)
       assert Phoenix.HTML.safe_to_string(html) =~ ~r(\/posts\/:id\/edit)
     end
 
     test "accepts an override page param name" do
-      html = Zf.Paginator.get(%Page{total_pages: 2, page_number: 1}, page_param: :custom_pp)
+      html = Zf.Pagination.zf_pagination(%Page{total_pages: 2, page_number: 1}, page_param: :custom_pp)
       assert Phoenix.HTML.safe_to_string(html) =~ ~r(custom_pp=2)
     end
 
     test "allows unicode" do
-      html = Zf.Paginator.get(%Page{total_pages: 2, page_number: 2}, previous: "«")
+      html = Zf.Pagination.zf_pagination(%Page{total_pages: 2, page_number: 2}, previous: "«")
       assert Phoenix.HTML.safe_to_string(html) == """
       <ul class=\"pagination\" role=\"pagination\"><li><a href=\"?page=1\" rel=\"prev\">«</a></li><li><a href=\"?page=1\" rel=\"prev\">1</a></li><li class=\"current\"><span class=\"show-for-sr\">You&#39;re on page</span>2</li></ul>
       """ |> String.trim_trailing
     end
 
     test "allows using raw" do
-      html = Zf.Paginator.get(%Page{total_pages: 2, page_number: 2}, previous: Phoenix.HTML.raw("&leftarrow;"))
+      html = Zf.Pagination.zf_pagination(%Page{total_pages: 2, page_number: 2}, previous: Phoenix.HTML.raw("&leftarrow;"))
       assert Phoenix.HTML.safe_to_string(html) == """
       <ul class=\"pagination\" role=\"pagination\"><li><a href=\"?page=1\" rel=\"prev\">&leftarrow;</a></li><li><a href=\"?page=1\" rel=\"prev\">1</a></li><li class=\"current\"><span class=\"show-for-sr\">You&#39;re on page</span>2</li></ul>
       """ |> String.trim_trailing
     end
 
     test "accept nested keyword list for additionnal params" do
-      html = Zf.Paginator.get(%Page{total_pages: 2, page_number: 2}, q: [name: "joe"])
+      html = Zf.Pagination.zf_pagination(%Page{total_pages: 2, page_number: 2}, q: [name: "joe"])
       assert Phoenix.HTML.safe_to_string(html) =~ ~r(q\[name\]=joe)
     end
   end
@@ -233,7 +233,7 @@ defmodule Zf.PaginatorTest do
                       [[60, "li", [[32, "class", 61, 34, "current", 34]], 62,
                       [[60, "span", [[32, "class", 61, 34, "show-for-sr", 34]], 62,
                       "You&#39;re on page", 60, 47, "span", 62], "1"], 60, 47, "li", 62]], 60, 47, "ul", 62]} =
-        Zf.Paginator.get(build_conn(), %Page{entries: [], page_number: 1, page_size: 10, total_entries: 0, total_pages: 0})
+        Zf.Pagination.zf_pagination(build_conn(), %Page{entries: [], page_number: 1, page_size: 10, total_entries: 0, total_pages: 0})
     end
 
     test "allows other url parameters" do
@@ -241,7 +241,7 @@ defmodule Zf.PaginatorTest do
       Application.put_env(:zf, :routes_helper, MyApp.Router.Helpers)
 
       assert "<ul class=\"pagination\" role=\"pagination\"><li class=\"current\"><span class=\"show-for-sr\">You&#39;re on page</span>1</li><li><a href=\"/posts?url_param=param&page=2\" rel=\"next\">2</a></li><li><a href=\"/posts?url_param=param&page=3\" rel=\"canonical\">3</a></li><li><a href=\"/posts?url_param=param&page=4\" rel=\"canonical\">4</a></li><li><a href=\"/posts?url_param=param&page=5\" rel=\"canonical\">5</a></li><li><a href=\"/posts?url_param=param&page=6\" rel=\"canonical\">6</a></li><li class=\"ellipsis\"></li><li><a href=\"/posts?url_param=param&page=20\" rel=\"canonical\">20</a></li><li><a href=\"/posts?url_param=param&page=2\" rel=\"next\">&gt;&gt;</a></li></ul>" ==
-        Zf.Paginator.get(build_conn(), %Page{entries: [%{__struct__: Post, some: :object}], page_number: 1, page_size: 10, total_entries: 200, total_pages: 20}, url_param: "param")
+        Zf.Pagination.zf_pagination(build_conn(), %Page{entries: [%{__struct__: Post, some: :object}], page_number: 1, page_size: 10, total_entries: 200, total_pages: 20}, url_param: "param")
         |> Phoenix.HTML.safe_to_string()
     end
   end
@@ -261,7 +261,7 @@ defmodule Zf.PaginatorTest do
                       [60, "li", [[32, "class", 61, 34, "", 34]], 62,
                       [[60, "span", [[32, "class", 61, 34, "show-for-sr", 34]],
                       62, "You&#39;re on page", 60, 47, "span", 62], "&gt;&gt;"], 60, 47, "li", 62]], 60, 47, "ul", 62]} ==
-        Zf.Paginator.get(build_conn(), %Page{entries: [], page_number: 1, page_size: 10, total_entries: 20, total_pages: 2})
+        Zf.Pagination.zf_pagination(build_conn(), %Page{entries: [], page_number: 1, page_size: 10, total_entries: 20, total_pages: 2})
     end
 
     test "with ellipsis" do
@@ -302,7 +302,7 @@ defmodule Zf.PaginatorTest do
                       [60, "li", [[32, "class", 61, 34, "", 34]], 62,
                       [[60, "span", [[32, "class", 61, 34, "show-for-sr", 34]], 62,
                       "You&#39;re on page", 60, 47, "span", 62], "&gt;&gt;"], 60, 47, "li", 62]], 60, 47, "ul", 62]} ==
-        Zf.Paginator.get(build_conn(), %Page{entries: [], page_number: 3, page_size: 10, total_entries: 100, total_pages: 10}, ellipsis: true)
+        Zf.Pagination.zf_pagination(build_conn(), %Page{entries: [], page_number: 3, page_size: 10, total_entries: 100, total_pages: 10}, ellipsis: true)
     end
 
   end

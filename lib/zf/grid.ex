@@ -8,7 +8,7 @@ defmodule Zf.Grid do
 
   ## Examples
 
-      iex> Zf.Grid.get([class: "expanded align-middle"], [[content: "Some content", class: "small-12"], [content: "Some content", class: "small-12"]])
+      iex> Zf.Grid.zf_grid([class: "expanded align-middle"], [[content: "Some content", class: "small-12"], [content: "Some content", class: "small-12"]])
       {:safe,
        [60, "div", [[32, "class", 61, 34, "expanded align-middle row", 34]], 62,
         [[60, "div", [[32, "class", 61, 34, "small-12 columns", 34]], 62,
@@ -20,7 +20,7 @@ defmodule Zf.Grid do
 
   import Phoenix.HTML.Tag
 
-  def get(options, contents) do
+  def zf_grid(options, contents) do
     row(options, contents |> Enum.map(fn(content) -> col(content) end))
   end
 

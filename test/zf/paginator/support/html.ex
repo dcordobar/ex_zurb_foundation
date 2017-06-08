@@ -1,4 +1,4 @@
-defmodule Zf.Paginator.Support.HTML do
+defmodule Zf.Pagination.Support.HTML do
 
   def pages(range), do: Enum.to_list(range) |> Enum.map(&({&1, &1}))
   def pages_with_first({first, num}, range), do: [{first, num}, {:ellipsis, Phoenix.HTML.raw("&hellip;")}] ++ pages(range)
@@ -10,7 +10,7 @@ defmodule Zf.Paginator.Support.HTML do
   def links_with_opts(paginator, opts \\ []) do
     paginator
     |> Enum.into(%{})
-    |> Zf.Paginator.raw_get(Keyword.merge([next: false, previous: false, first: false, last: false], opts))
+    |> Zf.Pagination.raw_pagination(Keyword.merge([next: false, previous: false, first: false, last: false], opts))
   end
 
 end
