@@ -1,29 +1,29 @@
-defmodule Zf.Paginator.SEO do
+defmodule Zf.Pagination.SEO do
   @moduledoc """
   SEO related functions for pagination. See [https://support.google.com/webmasters/answer/1663744?hl=en](https://support.google.com/webmasters/answer/1663744?hl=en)
   for more information.
 
-  `Zf.Paginator.pagination_links/4` will use this module to add `rel` to each link produced to indicate to search engines which
+  `Zf.Pagination.zf_pagination/4` will use this module to add `rel` to each link produced to indicate to search engines which
   link is the `next` or `prev`ious link in the chain of links. The default is `rel` value is `canonical` otherwise.
 
-  Additionally, it helps Google and other search engines to put `<link/>` tags in the `<head>`. The `Zf.Paginator.SEO.header_links/4`
-  function requires the same arguments you passed into your `Zf.Paginator.pagination_links/4` call in the view. However, `header_links` needs
+  Additionally, it helps Google and other search engines to put `<link/>` tags in the `<head>`. The `Zf.Pagination.SEO.header_links/4`
+  function requires the same arguments you passed into your `Zf.Pagination.zf_pagination/4` call in the view. However, `header_links` needs
   to go into the `<head>` section of your page. See [SEO Tags in Phoenix](http://blog.danielberkompas.com/2016/01/28/seo-tags-in-phoenix.html)
   for help with how to do that. The recommended option is to use `render_existing/2` in your layout file and add a separate view to render that.
   """
   alias Scrivener.Page
   use Phoenix.HTML
 
-  @defaults Zf.Paginator.defaults
+  @defaults Zf.Pagination.defaults
 
   @doc ~S"""
   Produces the value for a `rel` attribute in an `<a>` tag. Returns either `"next"`, `"prev"` or `"canonical"`.
 
-      iex> Zf.Paginator.SEO.rel(%Scrivener.Page{page_number: 5}, 4)
+      iex> Zf.Pagination.SEO.rel(%Scrivener.Page{page_number: 5}, 4)
       "prev"
-      iex> Zf.Paginator.SEO.rel(%Scrivener.Page{page_number: 5}, 6)
+      iex> Zf.Pagination.SEO.rel(%Scrivener.Page{page_number: 5}, 6)
       "next"
-      iex> Zf.Paginator.SEO.rel(%Scrivener.Page{page_number: 5}, 8)
+      iex> Zf.Pagination.SEO.rel(%Scrivener.Page{page_number: 5}, 8)
       "canonical"
   """
   def rel(%Page{page_number: current_page}, page_number) when current_page + 1 == page_number, do: "next"
@@ -33,10 +33,10 @@ defmodule Zf.Paginator.SEO do
   @doc ~S"""
   Produces `<link/>` tags for putting in the `<head>` to help SEO as recommended by Google webmasters.
 
-  Arguments are the same as `Zf.Paginator.pagination_links/4`. Consider using one of the following techniques to
+  Arguments are the same as `Zf.Pagination.zf_pagination/4`. Consider using one of the following techniques to
   call this function: [http://blog.danielberkompas.com/2016/01/28/seo-tags-in-phoenix.html](http://blog.danielberkompas.com/2016/01/28/seo-tags-in-phoenix.html)
 
-      iex> Phoenix.HTML.safe_to_string(Zf.Paginator.SEO.header_links(%Scrivener.Page{total_pages: 10, page_number: 3}))
+      iex> Phoenix.HTML.safe_to_string(Zf.Pagination.SEO.header_links(%Scrivener.Page{total_pages: 10, page_number: 3}))
       "<link href=\"?page=2\" rel=\"prev\"></link>\n<link href=\"?page=4\" rel=\"next\"></link>"
   """
   def header_links(conn, %Page{page_number: 1} = paginator, args, opts) do
@@ -58,7 +58,7 @@ defmodule Zf.Paginator.SEO do
 
   defp href(conn, paginator, args, opts, page_number) do
     merged_opts = Keyword.merge @defaults, opts
-    path = opts[:path] || Zf.Paginator.find_path_fn(conn && paginator.entries, args)
+    path = opts[:path] || Zf.Pagination.find_path_fn(conn && paginator.entries, args)
     url_params = Keyword.drop opts, (Keyword.keys(@defaults) ++ [:path])
     page_param = merged_opts[:page_param]
     params_with_page = url_params ++ [{page_param, page_number}]
