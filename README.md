@@ -1,4 +1,4 @@
-# Zurb Foundation for Elixir (Phoenix)
+# Zurb Foundation for Elixir (Phoenix 1.3.0)
 
 Helpers built to work with [Phoenix](http://www.phoenixframework.org)'s page struct to easily build HTML output for ZURB Foundation framework.
 
