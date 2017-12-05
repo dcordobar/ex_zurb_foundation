@@ -11,7 +11,7 @@ Add to `mix.exs`
   defp deps do
     [
       # ...
-      {:zf, "~> 0.1"}
+      {:zf, "~> 0.4.0", hex: :ex_zurb_foundation}
       # ...
     ]
   end
