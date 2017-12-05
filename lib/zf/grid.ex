@@ -20,26 +20,31 @@ defmodule Zf.Grid do
 
   import Phoenix.HTML.Tag
 
-  def zf_grid(options, contents) do
-    row(options, contents |> Enum.map(fn(content) -> col(content) end))
-  end
+  def zf_grid(options, contents),
+    do: row(options, contents |> Enum.map(fn(content) -> col(content) end))
 
-  def row(options, content) when is_list(options), do: row(Enum.into(options, %{}), content)
-  def row(options, content) do
-    class = %{class: "#{options[:class]} row"}
 
-    opts = options |> Map.drop([:tag])
+  def row(options, content) when is_list(options),
+    do: row(Enum.into(options, %{}), content)
 
-    content_tag(default_tag(options[:tag]), content, Map.merge(opts, class) |> Map.to_list)
-  end
+  def row(options, content),
+    do: default_tag(options[:tag]) |> content_tag(content, options |> Map.drop([:tag]) |> Map.merge(%{class: "#{options[:class]} row"}) |> Map.to_list)
 
-  def col(content) do
-    opts = [class: "#{content[:class]} columns"]
 
-    content_tag(default_tag(content[:tag]), content[:content], opts)
-  end
+  def col(nil),
+    do: ""
 
-  defp default_tag(nil), do: :div
-  defp default_tag(tag) when is_atom(tag), do: tag
-  defp default_tag(tag), do: String.to_atom(tag)
+  def col(content),
+    do: default_tag(content[:tag]) |> content_tag(content[:content], [class: "#{content[:class]} columns"])
+
+
+  defp default_tag(nil),
+    do: :div
+
+  defp default_tag(tag) when is_atom(tag),
+    do: tag
+
+  defp default_tag(tag),
+    do: String.to_atom(tag)
+
 end

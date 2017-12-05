@@ -7,6 +7,7 @@ defmodule Zf.GridTest do
       grid_default: [[content: "Some content", class: "small-12"], [content: "Some content", class: "small-12"]],
       grid_custom: [[tag: :li, content: "Some content", class: "small-12"], [tag: :li, content: "Some content", class: "small-12"]],
       grid_map: [%{content: "Some content", class: "small-12"}, %{content: "Some content", class: "small-12"}],
+      grid_map_with_nils: [%{content: "Some content", class: "small-12"}, nil],
     }
   end
 
@@ -59,4 +60,15 @@ defmodule Zf.GridTest do
 
     assert expected == Zf.Grid.zf_grid([class: "expanded align-middle", id: "some-id-name"], params[:grid_default])
   end
+
+  test "spawn foundation grid when options contains nils values", params do
+    expected = {:safe, [60, "div", [[32, "class", 61, 34, "expanded align-middle row", 34], [32, "id", 61, 34, "some-id-name", 34]], 62,
+      [[60, "div", [[32, "class", 61, 34, "small-12 columns", 34]], 62,
+        "Some content", 60, 47, "div", 62],
+      ""], 60, 47, "div", 62]
+    }
+
+    assert expected == Zf.Grid.zf_grid([class: "expanded align-middle", id: "some-id-name"], params[:grid_map_with_nils])
+  end
+
 end
