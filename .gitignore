@@ -35,3 +35,6 @@ mix.lock
 
 # Node modules
 node_modules/
+
+# Documentation
+/doc
