@@ -40,7 +40,7 @@ defmodule Zf.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [
-      {:phoenix, "~> 1.3.0"},
+      {:phoenix, "~> 1.4"},
       {:phoenix_html, "~> 2.6"},
       {:ex_doc, "~> 0.15", only: :dev},
       {:scrivener, "~> 1.2 or ~> 2.0"},
