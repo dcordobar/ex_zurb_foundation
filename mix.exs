@@ -5,7 +5,7 @@ defmodule Zf.Mixfile do
     [
       app: :zf,
       version: "0.5.0",
-      elixir: "~> 1.4",
+      elixir: "~> 1.8",
       build_embedded: Mix.env == :prod,
       start_permanent: Mix.env == :prod,
       elixirc_paths: elixirc_paths(Mix.env),
@@ -41,7 +41,6 @@ defmodule Zf.Mixfile do
   defp deps do
     [
       {:phoenix, "~> 1.4"},
-      {:phoenix_html, "~> 2.6"},
       {:ex_doc, "~> 0.15", only: :dev},
       {:scrivener, "~> 1.2 or ~> 2.0"},
       {:plug, "~> 1.1" },
